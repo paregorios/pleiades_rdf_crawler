@@ -43,6 +43,7 @@ POSITIONAL_ARGUMENTS = [
     ["start_id", str, "Pleiades URI to start with"],
 ]
 BASE_URI = "https://pleiades.stoa.org/places/"
+ns_geo = Namespace("http://www.w3.org/2003/01/geo/wgs84_pos#")
 ns_pleiades_relationship_types = Namespace(
     "https://pleiades.stoa.org/vocabularies/relationship-types/"
 )
@@ -79,6 +80,12 @@ def get_place(webi, puri) -> Graph:
         g.add((URIRef(puri), URIRef(c["connectionTypeURI"]), URIRef(c["connectsTo"])))
     logger.debug(f"Modified RDF for {puri} now has {len(g)} triples.")
     return g
+
+
+def get_repr_point(webi, puri) -> tuple:
+    ### get the representative point for a puri from its json
+    j = get_json(webi, puri)
+    return tuple(j["reprPoint"])
 
 
 def get_web_interface() -> Webi:
@@ -136,13 +143,31 @@ def main(**kwargs):
                         connected_places[str(o)]
                     except KeyError:
                         connected_places[str(o)] = None
-        logger.debug(pformat(connected_places.keys()))
+    logger.debug(f"connected places:\n{pformat(connected_places.keys())}")
 
     # get the union of all the individual place graphs
     big_graph = Graph()
     for puri, g in connected_places.items():
         big_graph += g
     logger.debug(f"There are {len(big_graph)} triples in big_graph")
+    for contype in conntypes:
+        for s, p, o in big_graph.triples((None, contype, None)):
+            logger.debug(f"<{s}> <{p}> <{o}>")
+
+    # get coordinates for all the places in the connections of interest
+    coords = dict()
+    for puri in connected_places.keys():
+        logger.debug(f"Getting coords for {puri}")
+        s = URIRef(puri)
+        try:
+            coords[puri] = (
+                # note coordinate order is x, y (long, lat)
+                float(list(big_graph.objects(s, ns_geo.long))[0]),
+                float(list(big_graph.objects(s, ns_geo.lat))[0]),
+            )
+        except IndexError:
+            coords[puri] = get_repr_point(webi, puri)
+    logger.debug(f"coordinates:\n{pformat(coords, indent=4)}")
 
 
 if __name__ == "__main__":
