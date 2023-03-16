@@ -1,3 +1,4 @@
 airtight
 rdflib
 validators
+webiquette @ https://github.com/isawnyu/webiquette/archive/refs/heads/main.zip
