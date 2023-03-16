@@ -4,6 +4,7 @@ play1
 
 from airtight.cli import configure_commandline
 import logging
+from pprint import pformat
 from rdflib import Graph, Namespace, URIRef
 from urllib.parse import urlparse
 from validators import url as valid_uri
@@ -29,10 +30,17 @@ OPTIONAL_ARGUMENTS = [
         "very verbose output (logging level == DEBUG)",
         False,
     ],
+    [
+        "-c",
+        "--conntypes",
+        "",
+        "comma-separate list of Pleiades relationship type terms that you want to follow",
+        True,
+    ],
 ]
 POSITIONAL_ARGUMENTS = [
     # each row is a list with 3 elements: name, type, help
-    ["start_id", str, "Pleiades URI to start with"]
+    ["start_id", str, "Pleiades URI to start with"],
 ]
 BASE_URI = "https://pleiades.stoa.org/places/"
 ns_pleiades_relationship_types = Namespace(
@@ -108,12 +116,22 @@ def main(**kwargs):
     """
     main function
     """
+    conntypes = [
+        getattr(ns_pleiades_relationship_types, ct.strip())
+        for ct in kwargs["conntypes"].split(",")
+    ]
+    logger.debug(f"Connection types: {pformat(conntypes, indent=4)}")
     start_uri = validate_id(kwargs["start_id"])
     logger.debug(f"start_uri: {start_uri}")
 
     webi = get_web_interface()
 
     pg = get_place(webi, start_uri)
+    for contype in conntypes:
+        if (None, contype, None) in pg:
+            logger.debug(f"HOORAY: {contype}")
+        else:
+            logger.debug(f"BOO: {contype}")
 
 
 if __name__ == "__main__":
