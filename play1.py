@@ -120,18 +120,29 @@ def main(**kwargs):
         getattr(ns_pleiades_relationship_types, ct.strip())
         for ct in kwargs["conntypes"].split(",")
     ]
-    logger.debug(f"Connection types: {pformat(conntypes, indent=4)}")
-    start_uri = validate_id(kwargs["start_id"])
-    logger.debug(f"start_uri: {start_uri}")
-
+    connected_places = {validate_id(kwargs["start_id"]): None}
     webi = get_web_interface()
 
-    pg = get_place(webi, start_uri)
-    for contype in conntypes:
-        if (None, contype, None) in pg:
-            logger.debug(f"HOORAY: {contype}")
-        else:
-            logger.debug(f"BOO: {contype}")
+    # crawl connections and load connected places until we run out of paths
+    while True:
+        puris_to_parse = {puri for puri, g in connected_places.items() if g is None}
+        if not puris_to_parse:
+            break
+        for puri in puris_to_parse:
+            connected_places[puri] = get_place(webi, puri)
+            for contype in conntypes:
+                for s, p, o in connected_places[puri].triples((None, contype, None)):
+                    try:
+                        connected_places[str(o)]
+                    except KeyError:
+                        connected_places[str(o)] = None
+        logger.debug(pformat(connected_places.keys()))
+
+    # get the union of all the individual place graphs
+    big_graph = Graph()
+    for puri, g in connected_places.items():
+        big_graph += g
+    logger.debug(f"There are {len(big_graph)} triples in big_graph")
 
 
 if __name__ == "__main__":
