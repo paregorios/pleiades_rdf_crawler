@@ -38,24 +38,28 @@ def raise_invalid_uri(v):
     raise ValueError(f"Invalid Pleiades URI or ID: {v}")
 
 
-def main(**kwargs):
-    """
-    main function
-    """
-    # logger = logging.getLogger(sys._getframe().f_code.co_name)
-    id = kwargs["start_id"]
+def validate_id(v):
+    id = v
     while True:
         if not (valid_uri(id)):
             try:
                 int(id)
             except ValueError:
-                raise_invalid_uri(kwargs["start_id"])
+                raise_invalid_uri(v)
             else:
                 id = BASE_URI + id
         elif not id.startswith(BASE_URI):
-            raise_invalid_uri(kwargs["start_id"])
+            raise_invalid_uri(v)
         else:
-            break
+            return id
+
+
+def main(**kwargs):
+    """
+    main function
+    """
+    start_uri = validate_id(kwargs["start_id"])
+    logger.debug(f"start_uri: {start_uri}")
 
 
 if __name__ == "__main__":
