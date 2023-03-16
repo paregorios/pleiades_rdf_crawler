@@ -162,12 +162,20 @@ def main(**kwargs):
         try:
             coords[puri] = (
                 # note coordinate order is x, y (long, lat)
-                float(list(big_graph.objects(s, ns_geo.long))[0]),
-                float(list(big_graph.objects(s, ns_geo.lat))[0]),
+                float(big_graph.value(s, ns_geo.long)),
+                float(big_graph.value(s, ns_geo.lat)),
             )
-        except IndexError:
+        except TypeError:
             coords[puri] = get_repr_point(webi, puri)
     logger.debug(f"coordinates:\n{pformat(coords, indent=4)}")
+
+    # create a line from subject to object for each connection and save to csv
+    # conn_lines = dict()
+    # for contype in conntypes:
+    #     for s, p, o in big_graph.triples((None, contype, None)):
+    #         s_uri = str(s)
+    #         o_uri = str(o)
+    #         s_pid =
 
 
 if __name__ == "__main__":
