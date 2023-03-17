@@ -23,7 +23,8 @@ I'm running this under Python 3.11.2 installed under MacOS Monterey in a virtual
 
 Attempt to construct spatial lines for export to GeoJSON from designated typed connections in Pleiades data. Invoke the script with a list of [connection types](https://pleiades.stoa.org/vocabularies/relationship-types) to follow, and a Pleiades place URI at which to start. Then it crawls the Pleiades read API to get the relevant data, which it parses to construct and output the lines. It's generally useful to run it in "verbose" mode (-v) in order to see what's happening. Very-verbose mode (-w) will get you a wall of debugging output if you're into that sort of thing.
 
-`python conn2lines.py -h
+```bash
+python conn2lines.py -h
 usage: conn2lines.py [-h] [-l LOGLEVEL] [-v] [-w] -c CONNTYPES start_id
 
 Crawl graphs of typed Pleiades connections and build straight lines between them in
@@ -42,7 +43,7 @@ options:
   -c CONNTYPES, --conntypes CONNTYPES
                         comma-separate list of Pleiades relationship type terms that you
                         want to follow (default: )
-`
+```
 
 Here's an example that collects and constructs lines for ancient routes (e.g., Peutinger Map, Antontine Itinerary) recorded with connections in Pleiades, beginning at [ancient Tipasa (modern Tipaza on the Mediterranean coast of Algeria)](https://pleiades.stoa.org/places/295363):
 
