@@ -4,7 +4,7 @@ play1
 
 from airtight.cli import configure_commandline
 import logging
-from pprint import pformat
+from pprint import pformat, pprint
 from rdflib import Graph, Namespace, URIRef
 from urllib.parse import urlparse
 from validators import url as valid_uri
@@ -72,6 +72,7 @@ def get_place(webi, puri) -> Graph:
     g = Graph()
     g.parse(data=ttl, format="turtle")
     logger.debug(f"RDF for {puri} has {len(g)} triples.")
+    
     # annoyingly, pleiades RDF doesn't have the connections from the database, so we have to build and add them from the JSON
     j = get_json(webi, puri)
     connections = j["connections"]
@@ -85,7 +86,10 @@ def get_place(webi, puri) -> Graph:
 def get_repr_point(webi, puri) -> tuple:
     ### get the representative point for a puri from its json
     j = get_json(webi, puri)
-    return tuple(j["reprPoint"])
+    try:
+        return tuple(j["reprPoint"])
+    except TypeError:
+        return None
 
 
 def get_web_interface() -> Webi:
@@ -170,12 +174,14 @@ def main(**kwargs):
     logger.debug(f"coordinates:\n{pformat(coords, indent=4)}")
 
     # create a line from subject to object for each connection and save to csv
-    # conn_lines = dict()
-    # for contype in conntypes:
-    #     for s, p, o in big_graph.triples((None, contype, None)):
-    #         s_uri = str(s)
-    #         o_uri = str(o)
-    #         s_pid =
+    conn_lines = list()
+    for contype in conntypes:
+        for s, p, o in big_graph.triples((None, contype, None)):
+            s_uri = str(s)
+            p_uri = str(p)
+            o_uri = str(o)
+            conn_lines.append((s_uri, p_uri, o_uri, [coords[s_uri], coords[o_uri]]))
+    logger.debug(f"conn_lines:\n{pformat(conn_lines, indent=4)}")
 
 
 if __name__ == "__main__":
