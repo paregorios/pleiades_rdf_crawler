@@ -3,6 +3,7 @@ Crawl graphs of typed Pleiades connections and build straight lines between them
 """
 
 from airtight.cli import configure_commandline
+from datetime import timedelta
 import logging
 from pprint import pformat, pprint
 from rdflib import Graph, Namespace, URIRef
@@ -12,6 +13,7 @@ from webiquette.webi import Webi
 
 logger = logging.getLogger(__name__)
 
+CACHE_EXPIRATION = timedelta(hours=24)
 DEFAULT_LOG_LEVEL = logging.WARNING
 OPTIONAL_ARGUMENTS = [
     [
@@ -99,7 +101,9 @@ def get_web_interface() -> Webi:
         "User-Agent": "Pleiades4Sebs2023/0.1",
         "from": "pleiades.admin@nyu.edu",
     }
-    return Webi(netloc=urlparse(BASE_URI).netloc, headers=headers)
+    return Webi(
+        netloc=urlparse(BASE_URI).netloc, headers=headers, expire_after=CACHE_EXPIRATION
+    )
 
 
 def raise_invalid_uri(v):
