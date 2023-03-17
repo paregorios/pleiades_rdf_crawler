@@ -3,6 +3,10 @@
 Experiments in collecting, parsing, and reusing connections in the Pleiades gazetteer of ancient places. 
 
 By: Tom Elliott, ISAW/NYU
+https://orcid.org/0000-0002-4114-6677
+
+Copyright 2023 New York University (non-faculty employee compensated work)
+GNU Affero General Public License (see LICENSE file)
 
 ## Install
 

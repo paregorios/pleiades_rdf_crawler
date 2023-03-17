@@ -1,3 +1,13 @@
+#
+# This script is part of the pleiades_rdf_crawler package
+# https://github.com/paregorios/pleiades_rdf_crawler
+#
+# By Tom Elliott
+# https://orcid.org/0000-0002-4114-66773
+#
+# Copyright 2023 New York University (non-faculty employee compensated work)
+# GNU Affero General Public License (see LICENSE file)
+#
 """
 Crawl graphs of typed Pleiades connections and build straight lines between them in GeoJSON
 """
