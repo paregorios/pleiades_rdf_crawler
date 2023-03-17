@@ -195,6 +195,9 @@ def main(**kwargs):
                 float(big_graph.value(s, ns_geo.lat)),
             )
         except TypeError:
+            # annoyingly, Pleiades RDF only includes representative point coordinates for places with a
+            # single location that has point geometry, so for the more complex cases we have to get the
+            # representative point from the Pleiades JSON
             coords[puri] = get_repr_point(webi, puri)
     logger.info(
         f"found coordinates for {len(coords)} of {len(connected_places)} connected places in our graph"
