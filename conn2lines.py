@@ -1,5 +1,5 @@
 """
-play1
+Crawl graphs of typed Pleiades connections and build straight lines between them in GeoJSON
 """
 
 from airtight.cli import configure_commandline
@@ -43,6 +43,7 @@ POSITIONAL_ARGUMENTS = [
     ["start_id", str, "Pleiades URI to start with"],
 ]
 BASE_URI = "https://pleiades.stoa.org/places/"
+ns_dcterms = Namespace("http://purl.org/dc/terms/")
 ns_geo = Namespace("http://www.w3.org/2003/01/geo/wgs84_pos#")
 ns_pleiades_relationship_types = Namespace(
     "https://pleiades.stoa.org/vocabularies/relationship-types/"
@@ -72,7 +73,7 @@ def get_place(webi, puri) -> Graph:
     g = Graph()
     g.parse(data=ttl, format="turtle")
     logger.debug(f"RDF for {puri} has {len(g)} triples.")
-    
+
     # annoyingly, pleiades RDF doesn't have the connections from the database, so we have to build and add them from the JSON
     j = get_json(webi, puri)
     connections = j["connections"]
@@ -127,11 +128,12 @@ def main(**kwargs):
     """
     main function
     """
+    conntype_terms = kwargs["conntypes"].split(",")
     conntypes = [
-        getattr(ns_pleiades_relationship_types, ct.strip())
-        for ct in kwargs["conntypes"].split(",")
+        getattr(ns_pleiades_relationship_types, ct.strip()) for ct in conntype_terms
     ]
-    connected_places = {validate_id(kwargs["start_id"]): None}
+    vid = validate_id(kwargs["start_id"])
+    connected_places = {vid: None}
     webi = get_web_interface()
 
     # crawl connections and load connected places until we run out of paths
@@ -147,7 +149,17 @@ def main(**kwargs):
                         connected_places[str(o)]
                     except KeyError:
                         connected_places[str(o)] = None
-    logger.debug(f"connected places:\n{pformat(connected_places.keys())}")
+
+    # get titles for each connected place so we can provide more human-readable output
+    place_titles = {
+        puri: str(g.value(URIRef(puri), ns_dcterms.title))
+        for puri, g in connected_places.items()
+    }
+
+    logger.info(
+        f"found {len(connected_places)} connected places by crawling connections of type(s) {conntype_terms} beginning at place {vid} ({place_titles[vid]})"
+    )
+    logger.info(f"connected places:\n{pformat(place_titles, indent=4)}")
 
     # get the union of all the individual place graphs
     big_graph = Graph()
@@ -161,17 +173,19 @@ def main(**kwargs):
     # get coordinates for all the places in the connections of interest
     coords = dict()
     for puri in connected_places.keys():
-        logger.debug(f"Getting coords for {puri}")
         s = URIRef(puri)
         try:
             coords[puri] = (
-                # note coordinate order is x, y (long, lat)
+                # note coordinate order is x, y (long, lat) a la geojson
                 float(big_graph.value(s, ns_geo.long)),
                 float(big_graph.value(s, ns_geo.lat)),
             )
         except TypeError:
             coords[puri] = get_repr_point(webi, puri)
-    logger.debug(f"coordinates:\n{pformat(coords, indent=4)}")
+    logger.info(
+        f"found coordinates for {len(coords)} of {len(connected_places)} connected places in our graph"
+    )
+    logger.info(f"coordinates:\n{pformat(coords, indent=4)}")
 
     # create a line from subject to object for each connection and save to csv
     conn_lines = list()
@@ -181,7 +195,7 @@ def main(**kwargs):
             p_uri = str(p)
             o_uri = str(o)
             conn_lines.append((s_uri, p_uri, o_uri, [coords[s_uri], coords[o_uri]]))
-    logger.debug(f"conn_lines:\n{pformat(conn_lines, indent=4)}")
+    logger.debug(f"connection lines:\n{pformat(conn_lines, indent=4)}")
 
 
 if __name__ == "__main__":
