@@ -124,4 +124,4 @@ This is another package I wrote, and its aim is to make us easily well-behaved (
 - setting a custom [user agent string](https://en.wikipedia.org/wiki/User_agent), which everyone everywhere should always do in every script they write
 - setting the local cache expiration to 24 hours instead of the default 30 days, in case something changes on the server
 
-Note: the easiest way to ignore local caching completely for your next run of the script is to blow away the cache files locally: `rm -rf data/cache`.
+Note: the easiest way to ignore local caching completely for your next run of the script is to blow away the cache files locally: `rm -rf data/cache`, but note that this does nothing about bypassing server-side caching.
