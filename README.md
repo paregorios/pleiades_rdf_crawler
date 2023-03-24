@@ -50,6 +50,7 @@ options:
 By default, the script only returns outbound connections (i.e., where the specified Pleiades ID is the subject of a connection triple).
 
 ```
+python got_conns.py 579885
 P579885 Athenae has 1 connection:
 	<https://pleiades.stoa.org/places/579885> <https://pleiades.stoa.org/vocabularies/relationship-types/capital> <https://pleiades.stoa.org/places/579888>
 ```
