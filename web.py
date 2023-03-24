@@ -15,7 +15,7 @@ Web-related code for scripts in the pleiades_rdf_crawler
 
 from datetime import timedelta
 import logging
-from rdflib import Graph, URIRef
+from rdflib import Graph, Namespace, URIRef
 from webiquette.webi import Webi
 from urllib.parse import urlparse
 from validators import url as valid_uri
@@ -23,6 +23,13 @@ from validators import url as valid_uri
 BASE_URI = "https://pleiades.stoa.org/places/"
 CACHE_EXPIRATION = timedelta(hours=24)
 logger = logging.getLogger(__name__)
+ns_dcterms = Namespace("http://purl.org/dc/terms/")
+ns_geo = Namespace("http://www.w3.org/2003/01/geo/wgs84_pos#")
+BASE_URI_PLEIADES_RELATIONSHIP_TYPES = (
+    "https://pleiades.stoa.org/vocabularies/relationship-types/"
+)
+ns_pleiades_relationship_types = Namespace(BASE_URI_PLEIADES_RELATIONSHIP_TYPES)
+ns_pleiades_places = Namespace("https://pleiades.stoa.org/places/vocab#")
 
 
 def get_ttl(webi, puri) -> str:
@@ -54,6 +61,9 @@ def get_place_graph(webi, puri) -> Graph:
     logger.debug(f"JSON for {puri} has {len(connections)} connections.")
     for c in connections:
         g.add((URIRef(puri), URIRef(c["connectionTypeURI"]), URIRef(c["connectsTo"])))
+        logger.debug(
+            f"Added triple: '<{puri}> <{c['connectionTypeURI']}> <{c['connectsTo']}>'"
+        )
     logger.debug(f"Modified RDF for {puri} now has {len(g)} triples.")
     return g
 

@@ -15,7 +15,7 @@ Crawl graphs of typed Pleiades connections and build straight lines between them
 from airtight.cli import configure_commandline
 import logging
 from pprint import pformat, pprint
-from rdflib import Graph, Namespace, URIRef
+from rdflib import Graph, URIRef
 from web import *
 
 logger = logging.getLogger(__name__)
@@ -50,12 +50,6 @@ POSITIONAL_ARGUMENTS = [
     # each row is a list with 3 elements: name, type, help
     ["start_id", str, "Pleiades URI to start with"],
 ]
-ns_dcterms = Namespace("http://purl.org/dc/terms/")
-ns_geo = Namespace("http://www.w3.org/2003/01/geo/wgs84_pos#")
-ns_pleiades_relationship_types = Namespace(
-    "https://pleiades.stoa.org/vocabularies/relationship-types/"
-)
-ns_pleiades_places = Namespace("https://pleiades.stoa.org/places/vocab#")
 
 
 def main(**kwargs):
