@@ -38,6 +38,13 @@ OPTIONAL_ARGUMENTS = [
         "very verbose output (logging level == DEBUG)",
         False,
     ],
+    [
+        "-b",
+        "--bidi",
+        False,
+        "bidirectional, i.e. include inbound connections in addition to outbound",
+        False,
+    ],
 ]
 POSITIONAL_ARGUMENTS = [
     # each row is a list with 3 elements: name, type, help
@@ -51,7 +58,7 @@ def main(**kwargs):
     """
     vid = validate_id(kwargs["start_id"])
     webi = get_web_interface()
-    p_graph = get_place_graph(webi, vid)
+    p_graph = get_place_graph(webi, vid, include_inbound=kwargs["bidi"])
     ttl = p_graph.serialize(format="turtle")
     logger.debug(ttl)
     connections = list()
@@ -65,7 +72,7 @@ def main(**kwargs):
     c_count = len(connections)
     p_title = str(p_graph.value(URIRef(vid), ns_dcterms.title))
     print(
-        f"P{vid.split('/')[-1]}: {p_title} has {c_count} outbound connection{('', 's')[c_count > 1]}."
+        f"P{vid.split('/')[-1]} {p_title} has {c_count} connection{('', 's')[c_count != 1]}:"
     )
     for c in connections:
         row = " ".join([f"<{item}>" for item in c])

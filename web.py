@@ -15,6 +15,7 @@ Web-related code for scripts in the pleiades_rdf_crawler
 
 from datetime import timedelta
 import logging
+from pprint import pformat
 from rdflib import Graph, Namespace, URIRef
 from webiquette.webi import Webi
 from urllib.parse import urlparse
@@ -48,7 +49,7 @@ def get_json(webi, puri) -> dict:
     return r.json()
 
 
-def get_place_graph(webi, puri) -> Graph:
+def get_place_graph(webi, puri, include_inbound=False) -> Graph:
     ### download and parse data about the place at puri and return it as an RDFLIB Graph
     ttl = get_ttl(webi, puri)
     g = Graph()
@@ -56,16 +57,49 @@ def get_place_graph(webi, puri) -> Graph:
     logger.debug(f"RDF for {puri} has {len(g)} triples.")
 
     # annoyingly, pleiades RDF doesn't have the connections from the database, so we have to build and add them from the JSON
+    connections = get_outbound_connections(webi, puri)
+    for c in connections:
+        g.add(c)
+    logger.debug(
+        f"Modified RDF to add outbound connections from {puri} now has {len(g)} triples."
+    )
+
+    if include_inbound:
+        connections = get_inbound_connections(webi, puri)
+        for c in connections:
+            g.add(c)
+        logger.debug(
+            f"Modified RDF to add inbound connections to {puri} now has {len(g)} triples."
+        )
+
+    return g
+
+
+def get_outbound_connections(webi, puri) -> list:
+    ### get outbound connections from a puri and return a list of them as s, p, o tuples
     j = get_json(webi, puri)
     connections = j["connections"]
     logger.debug(f"JSON for {puri} has {len(connections)} connections.")
+    triples = list()
     for c in connections:
-        g.add((URIRef(puri), URIRef(c["connectionTypeURI"]), URIRef(c["connectsTo"])))
-        logger.debug(
-            f"Added triple: '<{puri}> <{c['connectionTypeURI']}> <{c['connectsTo']}>'"
+        triples.append(
+            (URIRef(puri), URIRef(c["connectionTypeURI"]), URIRef(c["connectsTo"]))
         )
-    logger.debug(f"Modified RDF for {puri} now has {len(g)} triples.")
-    return g
+    return triples
+
+
+def get_inbound_connections(webi, puri):
+    ### get inbound connections from a puri and return a list of them as s, p, o tuples
+    j = get_json(webi, puri)
+    inbound = j["connectsWith"]
+    logger.debug(len(inbound))
+    triples = list()
+    for in_puri in inbound:
+        triples.extend(
+            [c for c in get_outbound_connections(webi, in_puri) if str(c[2]) == puri]
+        )
+    logger.debug(pformat(triples, indent=4))
+    return triples
 
 
 def get_repr_point(webi, puri) -> tuple:

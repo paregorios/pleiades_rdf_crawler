@@ -25,11 +25,11 @@ I'm running this under Python 3.11.2 installed under MacOS Monterey in a virtual
 
 ### got_conns.py
 
-List all the outbound connections on a particular place.
+List all the connections involving a particular place.
 
-```bash
+```
 python got_conns.py -h
-usage: got_conns.py [-h] [-l LOGLEVEL] [-v] [-w] start_id
+usage: got_conns.py [-h] [-l LOGLEVEL] [-v] [-w] [-b] start_id
 
 Find out what connections, if any, a particular Pleiades place has
 
@@ -40,24 +40,65 @@ options:
   -h, --help            show this help message and exit
   -l LOGLEVEL, --loglevel LOGLEVEL
                         desired logging level (case-insensitive string: DEBUG, INFO,
-                        WARNING, or ERROR (default: NOTSET)
+                        WARNING, or ERROR) (default: NOTSET)
   -v, --verbose         verbose output (logging level == INFO) (default: False)
   -w, --veryverbose     very verbose output (logging level == DEBUG) (default: False)
+  -b, --bidi            bidirectional, i.e. include inbound connections in addition to
+                        outbound (default: False)
 ```
 
-Here an example:
+By default, the script only returns outbound connections (i.e., where the specified Pleiades ID is the subject of a connection triple).
 
-```bash
-python got_conns.py 295363 
-P295363: Tipasa has 1 outbound connection.
-	<https://pleiades.stoa.org/places/295363> <https://pleiades.stoa.org/vocabularies/relationship-types/route_next> <https://pleiades.stoa.org/places/295243>
+```
+P579885 Athenae has 1 connection:
+	<https://pleiades.stoa.org/places/579885> <https://pleiades.stoa.org/vocabularies/relationship-types/capital> <https://pleiades.stoa.org/places/579888>
+```
+
+The `-b` (`--bidi`) option searches also for connections inbound to the specified Pleiades ID (i.e., where it is the object of a connection triple).
+
+```
+python got_conns.py -b 579885
+P579885 Athenae has 33 connections:
+	<https://pleiades.stoa.org/places/585959> <https://pleiades.stoa.org/vocabularies/relationship-types/part_of_physical> <https://pleiades.stoa.org/places/579885>
+	<https://pleiades.stoa.org/places/580062> <https://pleiades.stoa.org/vocabularies/relationship-types/part_of_admin> <https://pleiades.stoa.org/places/579885>
+	<https://pleiades.stoa.org/places/468194251> <https://pleiades.stoa.org/vocabularies/relationship-types/at> <https://pleiades.stoa.org/places/579885>
+	<https://pleiades.stoa.org/places/277534797> <https://pleiades.stoa.org/vocabularies/relationship-types/at> <https://pleiades.stoa.org/places/579885>
+	<https://pleiades.stoa.org/places/649966335> <https://pleiades.stoa.org/vocabularies/relationship-types/at> <https://pleiades.stoa.org/places/579885>
+	<https://pleiades.stoa.org/places/580051> <https://pleiades.stoa.org/vocabularies/relationship-types/connection> <https://pleiades.stoa.org/places/579885>
+	<https://pleiades.stoa.org/places/585128> <https://pleiades.stoa.org/vocabularies/relationship-types/connection> <https://pleiades.stoa.org/places/579885>
+	<https://pleiades.stoa.org/places/750203268> <https://pleiades.stoa.org/vocabularies/relationship-types/connection> <https://pleiades.stoa.org/places/579885>
+	<https://pleiades.stoa.org/places/491444298> <https://pleiades.stoa.org/vocabularies/relationship-types/at> <https://pleiades.stoa.org/places/579885>
+	<https://pleiades.stoa.org/places/579885> <https://pleiades.stoa.org/vocabularies/relationship-types/capital> <https://pleiades.stoa.org/places/579888>
+	<https://pleiades.stoa.org/places/580123> <https://pleiades.stoa.org/vocabularies/relationship-types/connection> <https://pleiades.stoa.org/places/579885>
+	<https://pleiades.stoa.org/places/759679649> <https://pleiades.stoa.org/vocabularies/relationship-types/connection> <https://pleiades.stoa.org/places/579885>
+	<https://pleiades.stoa.org/places/992770796> <https://pleiades.stoa.org/vocabularies/relationship-types/at> <https://pleiades.stoa.org/places/579885>
+	<https://pleiades.stoa.org/places/310115518> <https://pleiades.stoa.org/vocabularies/relationship-types/at> <https://pleiades.stoa.org/places/579885>
+	<https://pleiades.stoa.org/places/773761100> <https://pleiades.stoa.org/vocabularies/relationship-types/at> <https://pleiades.stoa.org/places/579885>
+	<https://pleiades.stoa.org/places/728329644> <https://pleiades.stoa.org/vocabularies/relationship-types/connection> <https://pleiades.stoa.org/places/579885>
+	<https://pleiades.stoa.org/places/122572945> <https://pleiades.stoa.org/vocabularies/relationship-types/at> <https://pleiades.stoa.org/places/579885>
+	<https://pleiades.stoa.org/places/649966334> <https://pleiades.stoa.org/vocabularies/relationship-types/at> <https://pleiades.stoa.org/places/579885>
+	<https://pleiades.stoa.org/places/638356144> <https://pleiades.stoa.org/vocabularies/relationship-types/connection> <https://pleiades.stoa.org/places/579885>
+	<https://pleiades.stoa.org/places/954340915> <https://pleiades.stoa.org/vocabularies/relationship-types/connection> <https://pleiades.stoa.org/places/579885>
+	<https://pleiades.stoa.org/places/558659669> <https://pleiades.stoa.org/vocabularies/relationship-types/at> <https://pleiades.stoa.org/places/579885>
+	<https://pleiades.stoa.org/places/720198157> <https://pleiades.stoa.org/vocabularies/relationship-types/connection> <https://pleiades.stoa.org/places/579885>
+	<https://pleiades.stoa.org/places/650003009> <https://pleiades.stoa.org/vocabularies/relationship-types/connection> <https://pleiades.stoa.org/places/579885>
+	<https://pleiades.stoa.org/places/968858713> <https://pleiades.stoa.org/vocabularies/relationship-types/part_of_physical> <https://pleiades.stoa.org/places/579885>
+	<https://pleiades.stoa.org/places/146086514> <https://pleiades.stoa.org/vocabularies/relationship-types/connection> <https://pleiades.stoa.org/places/579885>
+	<https://pleiades.stoa.org/places/969121823> <https://pleiades.stoa.org/vocabularies/relationship-types/part_of_physical> <https://pleiades.stoa.org/places/579885>
+	<https://pleiades.stoa.org/places/807514119> <https://pleiades.stoa.org/vocabularies/relationship-types/at> <https://pleiades.stoa.org/places/579885>
+	<https://pleiades.stoa.org/places/235795850> <https://pleiades.stoa.org/vocabularies/relationship-types/at> <https://pleiades.stoa.org/places/579885>
+	<https://pleiades.stoa.org/places/97294452> <https://pleiades.stoa.org/vocabularies/relationship-types/at> <https://pleiades.stoa.org/places/579885>
+	<https://pleiades.stoa.org/places/659771158> <https://pleiades.stoa.org/vocabularies/relationship-types/part_of_physical> <https://pleiades.stoa.org/places/579885>
+	<https://pleiades.stoa.org/places/935764097> <https://pleiades.stoa.org/vocabularies/relationship-types/at> <https://pleiades.stoa.org/places/579885>
+	<https://pleiades.stoa.org/places/813654446> <https://pleiades.stoa.org/vocabularies/relationship-types/connection> <https://pleiades.stoa.org/places/579885>
+	<https://pleiades.stoa.org/places/168254096> <https://pleiades.stoa.org/vocabularies/relationship-types/part_of_regional> <https://pleiades.stoa.org/places/579885>
 ```
 
 ### conn2lines.py
 
 Attempt to construct spatial lines for export to GeoJSON from designated typed connections in Pleiades data. Invoke the script with a list of [connection types](https://pleiades.stoa.org/vocabularies/relationship-types) to follow, and a Pleiades place URI at which to start. Then it crawls the Pleiades read API to get the relevant data, which it parses to construct and output the lines. It's generally useful to run it in "verbose" mode (-v) in order to see what's happening. Very-verbose mode (-w) will get you a wall of debugging output if you're into that sort of thing.
 
-```bash
+```
 python conn2lines.py -h
 usage: conn2lines.py [-h] [-l LOGLEVEL] [-v] [-w] -c CONNTYPES start_id
 
@@ -81,7 +122,7 @@ options:
 
 Here's an example that collects and constructs lines for ancient routes (e.g., Peutinger Map, Antontine Itinerary) recorded with connections in Pleiades, beginning at [ancient Tipasa (modern Tipaza on the Mediterranean coast of Algeria)](https://pleiades.stoa.org/places/295363):
 
-```bash
+```
 python conn2lines.py -v -c route_next https://pleiades.stoa.org/places/295363
 INFO:root:logging level changed to INFO via command line option; was WARNING
 INFO:__main__:found 20 connected places by crawling connections of type(s) ['route_next'] beginning at place https://pleiades.stoa.org/places/295363 (Tipasa)
