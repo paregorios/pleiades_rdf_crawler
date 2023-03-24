@@ -13,10 +13,16 @@
 Web-related code for scripts in the pleiades_rdf_crawler
 """
 
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
+
+import gzip
+import json
 import logging
+from os.path import getmtime
+from pathlib import Path
 from pprint import pformat
 from rdflib import Graph, Namespace, URIRef
+import shutil
 from webiquette.webi import Webi
 from urllib.parse import urlparse
 from validators import url as valid_uri
@@ -49,6 +55,34 @@ def get_json(webi, puri) -> dict:
     return r.json()
 
 
+def get_json_dump() -> dict:
+    ### get the entire JSON dump file from pleiades
+    webi = get_web_interface("http://atlantides.org")
+    uri = "http://atlantides.org/downloads/pleiades/json/pleiades-places-latest.json.gz"
+    path = Path("data") / "all.json"
+    fetch_json = False
+    try:
+        modified = datetime.fromtimestamp(getmtime(path), timezone.utc)
+    except FileNotFoundError:
+        fetch_json = True
+    else:
+        if modified.date() < datetime.today().date():
+            fetch_json = True
+    if fetch_json:
+        logger.debug("Fetching fresh JSON")
+        r = webi.get(uri, stream=True, bypass_cache=True)
+        r.raw.decode_content = True
+        gzip_file = gzip.GzipFile(fileobj=r.raw)
+        with open(path, "wb") as f:
+            shutil.copyfileobj(gzip_file, f)
+    else:
+        logger.debug("Local copy of json is less than a day old, so using that")
+    with open(path, "r", encoding="utf-8") as f:
+        j = json.load(f)
+    del f
+    return j
+
+
 def get_place_graph(webi, puri, include_inbound=False) -> Graph:
     ### download and parse data about the place at puri and return it as an RDFLIB Graph
     ttl = get_ttl(webi, puri)
@@ -75,9 +109,12 @@ def get_place_graph(webi, puri, include_inbound=False) -> Graph:
     return g
 
 
-def get_outbound_connections(webi, puri) -> list:
+def get_outbound_connections(webi, puri, pdata: dict = None) -> list:
     ### get outbound connections from a puri and return a list of them as s, p, o tuples
-    j = get_json(webi, puri)
+    if pdata is None:
+        j = get_json(webi, puri)
+    else:
+        j = pdata
     connections = j["connections"]
     logger.debug(f"JSON for {puri} has {len(connections)} connections.")
     triples = list()
@@ -111,14 +148,14 @@ def get_repr_point(webi, puri) -> tuple:
         return None
 
 
-def get_web_interface() -> Webi:
+def get_web_interface(uri=BASE_URI) -> Webi:
     ### instantiate and return a "webi" web interface object for the Pleiades website
     headers = {
         "User-Agent": "Pleiades4Sebs2023/0.1",
         "from": "pleiades.admin@nyu.edu",
     }
     return Webi(
-        netloc=urlparse(BASE_URI).netloc, headers=headers, expire_after=CACHE_EXPIRATION
+        netloc=urlparse(uri).netloc, headers=headers, expire_after=CACHE_EXPIRATION
     )
 
 
