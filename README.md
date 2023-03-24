@@ -23,6 +23,36 @@ I'm running this under Python 3.11.2 installed under MacOS Monterey in a virtual
 
 ## Availabile scripts
 
+### got_conns.py
+
+List all the outbound connections on a particular place.
+
+```bash
+python got_conns.py -h
+usage: got_conns.py [-h] [-l LOGLEVEL] [-v] [-w] start_id
+
+Find out what connections, if any, a particular Pleiades place has
+
+positional arguments:
+  start_id              Pleiades URI to start with
+
+options:
+  -h, --help            show this help message and exit
+  -l LOGLEVEL, --loglevel LOGLEVEL
+                        desired logging level (case-insensitive string: DEBUG, INFO,
+                        WARNING, or ERROR (default: NOTSET)
+  -v, --verbose         verbose output (logging level == INFO) (default: False)
+  -w, --veryverbose     very verbose output (logging level == DEBUG) (default: False)
+```
+
+Here an example:
+
+```bash
+python got_conns.py 295363 
+P295363: Tipasa has 1 outbound connection.
+	<https://pleiades.stoa.org/places/295363> <https://pleiades.stoa.org/vocabularies/relationship-types/route_next> <https://pleiades.stoa.org/places/295243>
+```
+
 ### conn2lines.py
 
 Attempt to construct spatial lines for export to GeoJSON from designated typed connections in Pleiades data. Invoke the script with a list of [connection types](https://pleiades.stoa.org/vocabularies/relationship-types) to follow, and a Pleiades place URI at which to start. Then it crawls the Pleiades read API to get the relevant data, which it parses to construct and output the lines. It's generally useful to run it in "verbose" mode (-v) in order to see what's happening. Very-verbose mode (-w) will get you a wall of debugging output if you're into that sort of thing.
